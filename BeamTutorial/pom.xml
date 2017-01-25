@@ -48,7 +48,7 @@
           usedDependencies:
               Force dependencies as used, to override incomplete result caused by bytecode-level analysis.
               Dependency format is groupId:artifactId.-->
-      <plugin>
+     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
@@ -211,19 +211,5 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-    <repository>
-      <id>homeaway-repository</id>
-      <name>HomeAway Services Nexus Repo</name>
-      <url>http://mvn-repo.wvrgroup.internal/maven</url>
-      <layout>default</layout>
-    </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>homeaway</id>
-      <name>homeaway</name>
-      <layout>default</layout>
-      <url>http://mvn-repo.wvrgroup.internal/maven</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

@@ -1,24 +1,62 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.google.cloud.dataflow</groupId>
-  <artifactId>Tutorial</artifactId>
+  <artifactId>beam-tutorial</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
-
   <properties>
-    <beam.version>0.4.0-incubating-SNAPSHOT</beam.version>
-    <slf4j.version>1.7.5</slf4j.version>
-    <junit.version>4.8.2</junit.version>
-    <hamcrest.version>1.3</hamcrest.version>
-    <mockito.version>1.10.19</mockito.version>
+    <beam.version>0.3.0-incubating</beam.version>
     <bigquery.version>v2-rev312-1.22.0</bigquery.version>
+    <hamcrest.version>1.3</hamcrest.version>
+    <junit.version>4.8.2</junit.version>
+    <maven-checkstyle-plugin.version>2.16</maven-checkstyle-plugin.version>
+    <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+    <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+    <mockito.version>1.10.19</mockito.version>
+    <slf4j.version>1.7.5</slf4j.version>
+    <spark.version>2.1.0</spark.version>
   </properties>
 
   <build>
-   <plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${maven-checkstyle-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-dependency-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${maven-shade-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- Enforce coding conventions.  Pass -Dcheckstyle.skip=true to disable temporarily. -->
+      <!-- ==================== undeclared dependency plugin ====================
+          http://maven.apache.org/plugins/maven-dependency-plugin/analyze-mojo.html#usedDependencies
+          usedDependencies:
+              Force dependencies as used, to override incomplete result caused by bytecode-level analysis.
+              Dependency format is groupId:artifactId.-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <usedDependencies>
+            <usedDependency>com.homeaway.api:api-geo-v2-api</usedDependency>
+          </usedDependencies>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -31,7 +69,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.3</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -39,6 +76,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <filters>
                 <filter>
                   <artifact>*:*</artifact>
@@ -55,13 +93,12 @@
   </build>
 
   <dependencies>
-    
     <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-sdks-java-core</artifactId>
       <version>${beam.version}</version>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-runners-direct-java</artifactId>
       <version>${beam.version}</version>
@@ -76,7 +113,7 @@
       <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
       <version>${beam.version}</version>
     </dependency>
-    
+
     <!-- Runners for cloud demos -->
     <dependency>
       <groupId>org.apache.beam</groupId>
@@ -94,17 +131,49 @@
     <!-- but we want to deploy it with the application. -->
     <!-- More information: https://github.com/eljefe6a/beamexample/issues/3 -->
     <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.11</artifactId>
+      <version>${spark.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!--<dependency>
 		<groupId>org.apache.spark</groupId>
-		<artifactId>spark-core_2.10</artifactId>
+		<artifactId>spark-core_2.11</artifactId>
 		<version>1.6.0</version>
-	</dependency>
+	</dependency> -->
+    <!--Spark Streaming-->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_2.11</artifactId>
+      <version>${spark.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
       <version>${beam.version}</version>
     </dependency>
-    
+
     <!-- Download Beam examples to run as demos -->
     <dependency>
       <groupId>org.apache.beam</groupId>
@@ -116,7 +185,7 @@
       <artifactId>beam-examples-java</artifactId>
       <version>${beam.version}</version>
     </dependency>
-        
+
     <!-- slf4j API frontend binding with JUL backend -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -129,7 +198,7 @@
       <version>${slf4j.version}</version>
     </dependency>
   </dependencies>
-    
+
   <repositories>
     <repository>
       <id>apache-maven-repo</id>
@@ -142,5 +211,19 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>homeaway-repository</id>
+      <name>HomeAway Services Nexus Repo</name>
+      <url>http://mvn-repo.wvrgroup.internal/maven</url>
+      <layout>default</layout>
+    </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>homeaway</id>
+      <name>homeaway</name>
+      <layout>default</layout>
+      <url>http://mvn-repo.wvrgroup.internal/maven</url>
+    </pluginRepository>
+  </pluginRepositories>
 </project>

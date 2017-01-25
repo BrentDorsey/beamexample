@@ -55,10 +55,23 @@ import org.apache.beam.sdk.values.TypeDescriptors;
  * To run this, you will need to set the following options in the "Arguments"
  * tab of the run configuration (you'll need this in future configurations as
  * well):
- * 
+ *
+ * Create Google Cloud Storage Bucket
  * <pre>
  * {@code
- *   --dataset=YOUR-DATASET
+ * gsutil mb gs://[YOUR-GCS-BUCKET-NAME]/
+ * }
+ * </pre>
+ *
+ * Execute this example using the code below replacing:
+ *  [YOUR-GCP-PROJECT] with your Google Cloud Dataflow project name
+ *  [YOUR-GCS-BUCKET-NAME] with your Google Cloud Storage bucket name
+ *  [YOUR-GBQ-DATASET-NAME] with your Google BigQuery Dataset name
+ *
+ * <pre>
+ * {@code
+ *   mvn -X exec:java -Dexec.mainClass="org.apache.beam.examples.tutorial.game.solution.Exercise1" -Dexec.args='--runner=DataflowRunner
+ *   --project=[YOUR-GCP-PROJECT] --gcpTempLocation=gs://[YOUR-GCS-BUCKET-NAME] --outputPrefix=gs://beamexample/output/ --dataset=[YOUR-GBQ-DATASET-NAME]'
  * }
  * </pre>
  */
@@ -80,37 +93,26 @@ public class Exercise1 {
 
     @Override
     public PCollection<KV<String, Integer>> apply(PCollection<GameActionInfo> gameInfo) {
-
       // [START EXERCISE 1]:
       // JavaDoc: https://cloud.google.com/dataflow/java-sdk/JavaDoc
       // Developer Docs: https://cloud.google.com/dataflow/model/par-do
       //
       // Fill in the code to:
-      // 1. Extract a KV<String, Integer> from each GameActionInfo corresponding
-      // to the given
-      // KeyField and the score.
+      // 1. Extract a KV<String, Integer> from each GameActionInfo corresponding to the given KeyField and the score.
       // 2. Compute the sum of the scores for each key.
       // 3. Run your pipeline using the DirectPipelineRunner.
       return gameInfo
-          // MapElements is a PTransform for mapping a function over the
-          // elements of a
-          // PCollection. MapElements.via() takes a lambda expression defining
-          // the function
-          // to apply.
-          // Write the expression that creates key-value pairs, using the
-          // KeyField as the
-          // key and the score as the value. KV.of(key, value) creates a
-          // key-value pair.
-          // Java erasure means we can't determine the output type of our
-          // MapElements.
+          // MapElements is a PTransform for mapping a function over the elements of a
+          // PCollection. MapElements.via() takes a lambda expression defining the function to apply.
+          // Write the expression that creates key-value pairs, using the KeyField as the
+          // key and the score as the value. KV.of(key, value) creates a key-value pair.
+          // Java erasure means we can't determine the output type of our MapElements.
           // We declare the output type explicitly using withOutputType.
           // Use the following code to add the output type:
-          //
           .apply(MapElements.via((GameActionInfo info) -> {
             return KV.of(field.extract(info), info.getScore());
           }).withOutputType(TypeDescriptors.kvs(TypeDescriptors.strings(), TypeDescriptors.integers())))
-          // Sum is a family of PTransforms for computing the sum of elements in
-          // a PCollection.
+          // Sum is a family of PTransforms for computing the sum of elements in a PCollection.
           // Select the appropriate method to compute the sum over each key.
           .apply(Sum.integersPerKey());
       // [END EXERCISE 1]:
